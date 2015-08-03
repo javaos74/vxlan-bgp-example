@@ -35,10 +35,8 @@ def update_desc_with_cdp_neighbors_nexus72( neighbors):
 
 if __name__ == '__main__':
 	txt = cli.clid('show cdp nei')
-	print txt
-	if nexus72 :
-		update_desc_with_cdp_neighbors_nexus72 (txt)
-	else:
+	if type(txt) == str:
 		update_desc_with_cdp_neighbors(json.loads(txt))
-
+	else:
+		update_desc_with_cdp_neighbors_nexus72 (txt)
 

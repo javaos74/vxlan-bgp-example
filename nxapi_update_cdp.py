@@ -27,3 +27,5 @@ if __name__ == '__main__':
 		update_cdp( host, os.environ['NEXUS_USER'], os.environ['NEXUS_PASSWD'])
 	for host in role['spine']:
 		update_cdp( host, os.environ['NEXUS_USER'], os.environ['NEXUS_PASSWD'])
+	for host in role['router']:
+		update_cdp( host, os.environ['NEXUS_USER'], os.environ['NEXUS_PASSWD'])

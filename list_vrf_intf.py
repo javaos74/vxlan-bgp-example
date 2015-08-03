@@ -25,7 +25,7 @@ def list_vrf_interface_by_host( hostip, userid, passwd):
 	print vrf_map
 
 if __name__ == "__main__":
-	hosts = util.load_config( sys.argv[1])
+	hosts = util.load_config( sys.argv[1]) #hosts.yaml 
 	allhosts = hosts['spine'];
 	allhosts.extend( hosts['leaf'])
 	for host in allhosts:

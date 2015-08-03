@@ -52,8 +52,10 @@ def build_nodes( node, hostip=None):
 	item['size'] = 20
 	if 'leaf' in node.lower():
 		item['type'] = 'leaf'
-	else:
+	elif 'spine' in node.lower():
 		item['type'] = 'spine'
+	else:
+		item['type'] = 'router' 
 	if hostip:
 		item['address'] = hostip
 	return item
@@ -62,12 +64,17 @@ def get_host_from_device_id( devid):
 	return devid.split('(')[0]
 
 if __name__ == '__main__':
-	hosts = util.load_config( sys.argv[1])
+	hosts = []
+	role = util.load_config( sys.argv[1]) #hosts.yaml
+  	hosts.extend( role['spine'])
+	hosts.extend( role['leaf'])
+	hosts.extend( role['router'])
+
 	graph = {}
 	graph['nodes'] = []
 	graph['links'] = []
 	for hostip in hosts:
-		graph['nodes'].append( util.build_nodes( util.get_host(hostip,os.environ['NEXUS_USER'], os.environ['NEXUS_PASSWD']), hostip))
+		graph['nodes'].append( build_nodes( util.get_host(hostip,os.environ['NEXUS_USER'], os.environ['NEXUS_PASSWD']), hostip))
 
 	for hostip in hosts:
 		entries = get_neighbors( hostip, os.environ['NEXUS_USER'], os.environ['NEXUS_PASSWD'])
