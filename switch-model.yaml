@@ -7,7 +7,6 @@ common:
  hostname: LEAF-A
  role: leaf
  lo0: 5.5.5.5/32
- lo1: 200.1.1.1/32
 
  fabric: 
    eth1/1 : 192.168.2.111/24
@@ -15,13 +14,12 @@ common:
    eth1/3 : 192.168.10.133/24
    eth1/4 : 192.168.12.144/24
 
- server: [ eth1/47, eth1/48]
+ server: [ eth1/11, eth1/21, eth1/25]
 
 10.72.86.54: 
  hostname: LEAF-B
  role: leaf
  lo0: 6.6.6.6/32
- lo1: 200.1.1.1/32
 
  fabric: 
    eth1/1 : 192.168.1.111/24
@@ -29,13 +27,12 @@ common:
    eth1/3 : 192.168.9.133/24
    eth1/4 : 192.168.13.144/24
 
- server: [ eth1/47, eth1/48]
+ server: [ eth1/11, eth1/22, eth1/26]
 
 10.72.86.57: 
  hostname: LEAF-D
  role: leaf
  lo0: 8.8.8.8/32
- lo1: 200.1.1.1/32
 
  fabric: 
    eth1/1 : 192.168.4.111/24
@@ -43,7 +40,7 @@ common:
    eth1/3 : 192.168.12.133/24
    eth1/4 : 192.168.16.144/24
 
- server: [ eth1/47, eth1/48]
+ server: [ eth1/11, eth1/24, eth1/28]
 
 
 
@@ -51,7 +48,6 @@ common:
  hostname: LEAF-C
  role: leaf
  lo0: 7.7.7.7/32
- lo1: 200.1.1.1/32
 
  fabric:
    eth1/1 : 192.168.3.111/24
@@ -59,14 +55,14 @@ common:
    eth1/3 : 192.168.11.133/24
    eth1/4 : 192.168.15.144/24
 
- server: [ eth1/47, eth1/48 ]
+ server: [ eth1/11, eth1/23, eth1/27 ]
 
 
 10.72.86.51:
  hostname: SPINE-A
  role: spine
  lo0: 1.1.1.1/32
- lo1: 200.1.1.1/32
+ lo1: 100.1.1.1/32
 
  fabric:
    eth1/1: 192.168.1.11/24
@@ -78,7 +74,7 @@ common:
  hostname: SPINE-B
  role: spine
  lo0: 2.2.2.2/32
- lo1: 200.1.1.1/32
+ lo1: 100.1.1.1/32
 
  fabric:
    eth1/1: 192.168.5.22/24
@@ -90,7 +86,7 @@ common:
  hostname: SPINE-C
  role: spine
  lo0: 3.3.3.3/32
- lo1: 200.1.1.1/32
+ lo1: 100.1.1.1/32
 
  fabric:
    eth1/1: 192.168.9.33/24
@@ -102,7 +98,7 @@ common:
  hostname: SPINE-D
  role: spine
  lo0: 4.4.4.4/32
- lo1: 200.1.1.1/32
+ lo1: 100.1.1.1/32
 
  fabric:
    eth1/1: 192.168.13.44/24
