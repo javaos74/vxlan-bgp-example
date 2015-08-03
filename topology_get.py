@@ -8,7 +8,7 @@ import requests
 import json
 import sys
 import util
-
+import os
 
 
 def get_neighbors( hostip, userid, passwd):
@@ -67,10 +67,10 @@ if __name__ == '__main__':
 	graph['nodes'] = []
 	graph['links'] = []
 	for hostip in hosts:
-		graph['nodes'].append( util.build_nodes( util.get_host(hostip,'admin','1234Qwer'), hostip))
+		graph['nodes'].append( util.build_nodes( util.get_host(hostip,os.environ['NEXUS_USER'], os.environ['NEXUS_PASSWD']), hostip))
 
 	for hostip in hosts:
-		entries = get_neighbors( hostip, 'admin', '1234Qwer')
+		entries = get_neighbors( hostip, os.environ['NEXUS_USER'], os.environ['NEXUS_PASSWD'])
 		source = find_index_from_nodes( get_hostname_from_address(hostip, graph['nodes']), graph['nodes'])
 		for entry in entries:
 			target = find_index_from_nodes( get_host_from_device_id(entry['device_id']), graph['nodes'])

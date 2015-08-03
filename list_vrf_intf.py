@@ -6,6 +6,7 @@ import json
 import requests
 import sys
 import util
+import os
 
 
 def list_vrf_interface_by_host( hostip, userid, passwd):
@@ -29,4 +30,4 @@ if __name__ == "__main__":
 	allhosts = hosts['spine'];
 	allhosts.extend( hosts['leaf'])
 	for host in allhosts:
-		list_interface_by_host( host, 'admin', '1234Qwer')
+		list_interface_by_host( host, os.environ['NEXUS_USER'], os.environ['NEXUS_PASSWD'])

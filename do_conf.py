@@ -1,12 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-
-import yaml
 import sys
 import requests
 import json
 import util
+import os
 
 FEATURES = ['telnet', 'nxapi', 'bash-shell', 'scp-server', 'ospf', 'bgp', 'lldp', 'vn-segment-vlan-based', 'interface-vlan', 'nv overlay']
 
@@ -156,6 +155,9 @@ def conf_bgp( hostip, userid, passwd, bgp_as, lo0, peers, role = 'spine'):
 	print 'do bgp conf on %s is %s' %(hostip, retval)	
 	return retval
 
+def get_vrf_list(hostip,userid,passwd):
+	retval = True
+	target_cmd = "show vrf interface "
 
 if __name__ == '__main__':
 	host_role = util.load_config( sys.argv[1]) #hosts.yaml
@@ -163,14 +165,14 @@ if __name__ == '__main__':
 	hosts.extend( host_role['leaf'])
 	conf_model = util.load_model_config( sys.argv[2]) #switch-model.yaml 
 	'''
-	retval = conf_features(hosts[0],'admin','1234Qwer', FEATURES )
-	retval = conf_bgp( hosts[0], 'admin', '1234Qwer', 
+	retval = conf_features(hosts[0],os.environ['NEXUS_USER'], os.environ['NEXUS_PASSWD'], FEATURES )
+	retval = conf_bgp( hosts[0], os.environ['NEXUS_USER'], os.environ['NEXUS_PASSWD'], 
 			conf_model['common']['bgp_as'], 
 			conf_model[ hosts[0]]['lo0'].split('/')[0],
 			util.get_bgp_peers( hosts[0], conf_model), 
 			conf_model[hosts[0]]['role'])
 	'''
 	for host in host_role['leaf']:
-		retval = create_vlan( host, 'admin', '1234Qwer', 1003, '192.168.103.1', 'vxlan-900001', '2001003', '255.4.0.1')
+		retval = create_vlan( host, os.environ['NEXUS_USER'], os.environ['NEXUS_PASSWD'], 1003, '192.168.103.1', 'vxlan-900001', '2001003', '255.4.0.1')
 
 

@@ -6,6 +6,7 @@ import sys
 import requests
 import json
 import util
+import os 
 
 
 def update_cdp(hostip, userid, passwd):
@@ -23,6 +24,6 @@ def update_cdp(hostip, userid, passwd):
 if __name__ == '__main__':
 	role  = util.load_config( sys.argv[1]) #hosts.yaml
 	for host in role['leaf']:
-		update_cdp( host, 'admin', '1234Qwer')
+		update_cdp( host, os.environ['NEXUS_USER'], os.environ['NEXUS_PASSWD'])
 	for host in role['spine']:
-		update_cdp( host, 'admin', '1234Qwer')
+		update_cdp( host, os.environ['NEXUS_USER'], os.environ['NEXUS_PASSWD'])
