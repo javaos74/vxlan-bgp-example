@@ -15,14 +15,18 @@ def list_interface_by_host( hostip, userid, passwd):
 	outputs = resp['ins_api']['outputs']
 	if not 'Success' in outputs['output']['msg']:
 		return
-	for row in outputs['output']['body']['TABLE_intf']:
-		if row['ROW_intf']['link-state'] == 'up':
-			print " - ", row['ROW_intf']['intf-name'], row['ROW_intf']['prefix']
+	try:
+		for row in outputs['output']['body']['TABLE_intf']:
+			if row['ROW_intf']['link-state'] == 'up':
+				print " - ", row['ROW_intf']['intf-name'], row['ROW_intf']['prefix']
+	except:
+		pass
 
 
 if __name__ == "__main__":
 	hosts = util.load_config( sys.argv[1])
 	allhosts = hosts['spine'];
 	allhosts.extend( hosts['leaf'])
+	allhosts.extend( hosts['router'])
 	for host in allhosts:
 		list_interface_by_host( host, os.environ['NEXUS_USER'], os.environ['NEXUS_PASSWD'])

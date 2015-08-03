@@ -28,5 +28,6 @@ if __name__ == "__main__":
 	hosts = util.load_config( sys.argv[1]) #hosts.yaml 
 	allhosts = hosts['spine'];
 	allhosts.extend( hosts['leaf'])
+	allhosts.extend( hosts['router'])
 	for host in allhosts:
 		list_vrf_interface_by_host( host, os.environ['NEXUS_USER'], os.environ['NEXUS_PASSWD'])
