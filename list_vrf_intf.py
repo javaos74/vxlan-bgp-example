@@ -16,18 +16,17 @@ def list_vrf_interface_by_host( hostip, userid, passwd):
 	outputs = resp['ins_api']['outputs']
 	if not 'Success' in outputs['output']['msg']:
 		return
-	for row in outputs['output']['body']['TABLE_if']:
-		if vrf_map.has_key() :
-			vrf_map[row['ROW_if']['vrf_name']] = 
+	for row in outputs['output']['body']['TABLE_if']['ROW_if']:
+		if vrf_map.has_key( row['vrf_name']):
+			vrf_map[row['vrf_name']].add( row['if_name'])
 		else:
-			vrf_map[row['ROW_if']['vrf_name']] = set()
-			vrf_map[row['ROW_if']['vrf_name']].add( row['ROW_if']['if_name'])
-			print " - ", row['ROW_intf']['intf-name'], row['ROW_intf']['prefix']
-
+			vrf_map[row['vrf_name']] = set()
+			vrf_map[row['vrf_name']].add( row['if_name'])
+	print vrf_map
 
 if __name__ == "__main__":
 	hosts = util.load_config( sys.argv[1])
 	allhosts = hosts['spine'];
 	allhosts.extend( hosts['leaf'])
 	for host in allhosts:
-		list_interface_by_host( host, os.environ['NEXUS_USER'], os.environ['NEXUS_PASSWD'])
+		list_vrf_interface_by_host( host, os.environ['NEXUS_USER'], os.environ['NEXUS_PASSWD'])

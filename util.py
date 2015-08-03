@@ -68,7 +68,8 @@ def get_bgp_peers( myhost, model):
 
 def to_simple_ipv6(ipv4):
   digits = ipv4.split(".")
-  return digits.join(":") + "::1"
+  return ":".join(digits) + "::1"
+  
 
 def get_host( hostip, userid, passwd):
   resp = requests.post( get_nxapi_endpoint( hostip), data=json.dumps( get_payload('show hostname')), headers=myheaders,auth=(userid,passwd)).json()

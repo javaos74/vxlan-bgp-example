@@ -74,14 +74,17 @@ def delete_vrf( hostip, userid, passwd, vrf_name, vnid):
 	return retval
 
 def create_vlan( hostip, userid, passwd, vlan, vlan_svi, vrf, vxlan, mcast):
+	retval = True
 	#create vlan and map vxlan 
-	target_cmd = "conf t ; vlan %d ; vn-segment %d ;"
+	target_cmd = "conf t ; vlan %d ; vn-segment %d ;" %(vlan, vxlan)
 	#config vlan svi 
-	target_cmd += " interface vlan %d ; no shut ;  vrf member %s ; ip address %s/24 ; ipv6 address %s/64 fabric forwarding mode anycast-gateway " %(vlan, vrf, vlan_svi, util.to_simple_ipv6(vlan_svi))
+	target_cmd += " interface vlan %d ; no shut ;  vrf member %s ; ip address %s/24 ; ipv6 address %s/64 ; fabric forwarding mode anycast-gateway ; " %(vlan, vrf, vlan_svi, util.to_simple_ipv6(vlan_svi))
 	#add nve1 
-	target_cmd += " interface nve1 ; member vni %d ; suppress-arp ; mcast-group %s " %(vxlan, mcast)
-
+	target_cmd += " interface nve1 ; member vni %d ; suppress-arp ; mcast-group %s ;" %(vxlan, mcast)
+	#add evpn
+	target_cmd += " evpn ; vni %d l2 ; route-target import auto ; route-target export auto" %(vxlan)
 	target_cmd = util.remove_last_semicolon(target_cmd)
+	#print target_cmd
 	resp = requests.post( util.get_nxapi_endpoint( hostip), data=json.dumps( util.get_conf_payload( target_cmd)), headers=util.myheaders,auth=(userid,passwd)).json()
 	outputs = resp['ins_api']['outputs']['output']
 	#print outputs
@@ -93,7 +96,7 @@ def create_vlan( hostip, userid, passwd, vlan, vlan_svi, vrf, vxlan, mcast):
 
 def delete_vlan(hostip, userid, passwd, vlan, vlan_svi, vrf, vxlan, mcast):
 	retval = True
-	target_cmd  = "conf t ; no interface vlan %d ; no vlan %d "
+	target_cmd  = "conf t ; no interface vlan %d ; no vlan %d ; interface nve1 ; no member vni %d ; evpn ; no vni %d l2" %(vlan, vlan, vxlan, vxlan)
 	target_cmd = util.remove_last_semicolon(target_cmd)
 	resp = requests.post( util.get_nxapi_endpoint( hostip), data=json.dumps( util.get_conf_payload( target_cmd)), headers=util.myheaders,auth=(userid,passwd)).json()
 	outputs = resp['ins_api']['outputs']['output']
@@ -155,9 +158,6 @@ def conf_bgp( hostip, userid, passwd, bgp_as, lo0, peers, role = 'spine'):
 	print 'do bgp conf on %s is %s' %(hostip, retval)	
 	return retval
 
-def get_vrf_list(hostip,userid,passwd):
-	retval = True
-	target_cmd = "show vrf interface "
 
 if __name__ == '__main__':
 	host_role = util.load_config( sys.argv[1]) #hosts.yaml
@@ -172,7 +172,9 @@ if __name__ == '__main__':
 			util.get_bgp_peers( hosts[0], conf_model), 
 			conf_model[hosts[0]]['role'])
 	'''
+	#retval = create_vlan( '10.72.86.56', os.environ['NEXUS_USER'], os.environ['NEXUS_PASSWD'], 1003, '192.168.103.1', 'vxlan-900001', 2001003, '225.4.0.1')
 	for host in host_role['leaf']:
-		retval = create_vlan( host, os.environ['NEXUS_USER'], os.environ['NEXUS_PASSWD'], 1003, '192.168.103.1', 'vxlan-900001', '2001003', '255.4.0.1')
+		#retval = create_vlan( host, os.environ['NEXUS_USER'], os.environ['NEXUS_PASSWD'], 1003, '192.168.103.1', 'vxlan-900001', 2001003, '225.4.0.1')
+		retval = delete_vlan( host, os.environ['NEXUS_USER'], os.environ['NEXUS_PASSWD'], 1003, '192.168.103.1', 'vxlan-900001', 2001003, '225.4.0.1')
 
 
