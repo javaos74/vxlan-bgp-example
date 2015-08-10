@@ -29,6 +29,12 @@ def get_payload( cmd):
 	mypay['ins_api']['input'] = cmd
 	return mypay
 
+def get_payload_ascii( cmd):
+  mypay = payload
+  mypay['ins_api']['type'] = 'cli_show_ascii'
+  mypay['ins_api']['input'] = cmd
+  return mypay
+
 def get_conf_payload( cmd):
   mypay = payload
   mypay['ins_api']['type'] = 'cli_conf'
@@ -67,7 +73,12 @@ def get_spine_lo1(model):
       break
   return lo1
   
-
+def remove_empty_element_from_list( src):
+  target = list()
+  for i in src:
+    if len(i) > 0:
+      target.append(i)
+  return target
 
 def get_ip_from_cidr( ipaddr):
   return ipaddr.split('/')[0]
