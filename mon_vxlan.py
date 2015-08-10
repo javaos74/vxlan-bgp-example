@@ -58,8 +58,13 @@ def show_mac_all(hostip,userid,passwd):
 	outputs = resp['ins_api']['outputs']
 	if not 'Success' in outputs['output']['msg']:
 		return
-	for row in outputs['output']['body']['TABLE_l2route_mac_all']['ROW_l2route_mac_all']:
-		pt.add_row([ row['topo-id'], row['mac-addr'], row['prod-type'], row['next-hop'] ])
+	if type(outputs['output']['body']) == dict:
+		if type(outputs['output']['body']['TABLE_l2route_mac_all']['ROW_l2route_mac_all']) == list:
+			for row in outputs['output']['body']['TABLE_l2route_mac_all']['ROW_l2route_mac_all']:
+				pt.add_row([ row['topo-id'], row['mac-addr'], row['prod-type'], row['next-hop'] ])
+		else:
+			row = outputs['output']['body']['TABLE_l2route_mac_all']['ROW_l2route_mac_all']
+			pt.add_row([ row['topo-id'], row['mac-addr'], row['prod-type'], row['next-hop'] ])
 	print pt
 
 def show_mac_ip_all(hostip,userid,passwd):
@@ -71,8 +76,13 @@ def show_mac_ip_all(hostip,userid,passwd):
 	outputs = resp['ins_api']['outputs']
 	if not 'Success' in outputs['output']['msg']:
 		return
-	for row in outputs['output']['body']['TABLE_l2route_mac_ip_all']['ROW_l2route_mac_ip_all']:
-		pt.add_row([ row['topo-id'], row['mac-addr'], row['prod-type'], row['host-ip'], row['next-hop'] ])
+	if type(outputs['output']['body']) == dict:
+		if type(outputs['output']['body']['TABLE_l2route_mac_ip_all']['ROW_l2route_mac_ip_all']) == list:
+			for row in outputs['output']['body']['TABLE_l2route_mac_ip_all']['ROW_l2route_mac_ip_all']:
+				pt.add_row([ row['topo-id'], row['mac-addr'], row['prod-type'], row['host-ip'], row['next-hop'] ])
+			else:
+				row = outputs['output']['body']['TABLE_l2route_mac_ip_all']['ROW_l2route_mac_ip_all']
+				pt.add_row([ row['topo-id'], row['mac-addr'], row['prod-type'], row['host-ip'], row['next-hop'] ])
 	print pt
 
 
@@ -85,8 +95,9 @@ def show_ip_arp_suppression(hostip,userid,passwd):
 	outputs = resp['ins_api']['outputs']
 	if not 'Success' in outputs['output']['msg']:
 		return
-	for row in outputs['output']['body']['TABLE_arp-suppression']['ROW_arp-suppression']['TABLE_entries']['ROW_entries']:
-		pt.add_row([ row['ip-addr'], row['age'], row['mac'], row['vlan'], row['physical-iod'], row['flag'] ])
+	if type(outputs['output']['body']) == dict:	
+		for row in outputs['output']['body']['TABLE_arp-suppression']['ROW_arp-suppression']['TABLE_entries']['ROW_entries']:
+			pt.add_row([ row['ip-addr'], row['age'], row['mac'], row['vlan'], row['physical-iod'], row['flag'] ])
 	print pt
 
 def show_vxlan_interface(hostip,userid,passwd):
@@ -189,6 +200,7 @@ if __name__ == '__main__':
 	func = get_func(cmd)
 	if func != None:
 		for host in hosts:
+			print 'Host = %s' %host
 			func(host, os.environ['NEXUS_USER'], os.environ['NEXUS_PASSWD'])
 
 
