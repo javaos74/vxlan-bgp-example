@@ -11,10 +11,26 @@ except:
 	nexus72 = True
 
 
+def get_user_desc( intf):
+	txt = cli.clid('show interface %s desc' %intf)
+	try:
+		if type(txt) == str:
+			d = json.loads(txt)
+			desc = d['TABLE_interface']['ROW_interface']['desc']
+		else:
+			desc = txt['TABLE_interface']['ROW_interface']['desc']
+		if desc != None and len(desc) > 1:
+			msg = desc.split(':')                                 
+			return msg[0].strip() if len(msg) > 1 else ''  
+	except:
+		pass
+	return ''
+		
+
 def update_desc_with_cdp_neighbors( neighbors):
 	devices = neighbors['TABLE_cdp_neighbor_brief_info']['ROW_cdp_neighbor_brief_info']
 	for device in devices:
-		desc = "to %(port_id)s of %(device_id)s" %device
+		desc = get_user_desc(device['intf_id']) + " : to %(port_id)s of %(device_id)s" %device
 		r = cli.cli('conf t ; interface %s ; desc %s' %(device['intf_id'], desc))
 		print r
 
