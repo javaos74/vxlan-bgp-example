@@ -2,6 +2,17 @@
 common: 
  bgp_as: 65535
  ospf_as: 1
+ mtu : 9216
+ vrf: 
+   evpn-tenant-1:
+      vlan: 1101
+      vni : 20001101
+   evpn-tenant-2:
+      vlan : 1102
+      vni : 20001102
+   evpn-tenant-3:
+      vlan : 1103
+      vni : 20001103
 
 10.72.86.53: 
  hostname: LEAF-A
@@ -13,6 +24,11 @@ common:
    eth1/2 : 192.168.5.122/24
    eth1/3 : 192.168.9.133/24
    eth1/4 : 192.168.13.144/24
+ svi:
+   vlan1000 :
+     desc: 'test'
+     addr: 192.168.101.1/24
+     vrf: vrf-name
 
  server: [ eth1/11, eth1/21, eth1/25]
 
@@ -27,12 +43,29 @@ common:
    eth1/3 : 192.168.10.133/24
    eth1/4 : 192.168.14.144/24
 
- server: [ eth1/11, eth1/22, eth1/26]
+ server:
+   eth1/11 : trunk, vlan 1, vlan 1001, vlan 1002, vlan 1003, vlan 1004, vlan 1005, vlan 1006, channel-group 100, spanning-tree port type edge
+   eth1/12 : trunk, vlan 1, vlan 1001, vlan 1002, spanning-tree port type edge
+   eth1/22 : trunk, vlan 1001, channel-group 2122 mode active 
+   eth1/26 : trunk, vlan 1001, channel-group 2526 mode active 
+   eth1/32 : trunk, vlan 1001, vlan 1002
+   eth1/42 : no switchport, mtu 9216, ip address 172.16.12.1/24, ospf 1, vrf member evpn-tenant-3
+   eth1/46 : no switchport, mtu 9216, ip address 172.16.16.1/24, ospf 1, vrf member evpn-tenant-3
+   eth2/1 : trunk, channel-group 10 mode active
+   eth2/2 : trunk, channel-group 10 mode active
+
+ port-channel:
+   100: trunk, vpc 100, vlan 1, vlan 1001, vlan 1002, vlan 1003, vlan 1004, vlan 1005, vlan 1006
+   10 : trunk, vpc peer-link
+   2012: trunk, vpc 2012, vlan 1001
+   2526: trunk, vpc 2525, vlan 1001
+
 
 10.72.86.57: 
  hostname: LEAF-D
  role: leaf
  lo0: 8.8.8.8/32
+ lo0.sec: 34.34.34.34/32
 
  fabric: 
    eth1/1 : 192.168.4.111/24
@@ -105,3 +138,11 @@ common:
    eth1/2: 192.168.14.44/24
    eth1/3: 192.168.15.44/24
    eth1/4: 192.168.16.44/24
+
+10.72.86.127:
+ hostname: Nexus-Router-A
+ role: router
+ 
+10.72.86.128:
+ hostname: Nexus-Router-B 
+ role: router

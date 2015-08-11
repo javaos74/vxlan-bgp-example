@@ -63,11 +63,23 @@ def conf_vxlan_mcast( hostip, userid, passwd, anycast, mgrp_list, list_lo1, role
 	print 'do conf vxlan/nve1 on %s is %s' %(hostip, retval)
 	return retval
 
-
-def create_vrf(hostip, userid, passwd, vrf_name, vnid ):
+def add_nve_vni(hostip, userid, passwd, vnid, mcast_grp):
 	retval = True
-	target_cmd = "conf t ; vrf context %s ; vni %d ; rd auto ; address-family ipv6 unicast ; route-target both auto ; route-target both auto evpn ; " %(vrf_name, vnid)
-	target_cmd += "interface nve1 ; member vni %d associate-vrf" %(vnid)
+	target_cmd = "conf t ; interface nve 1 ; member vni %d ; suppress-arp ; mcast-group %s ; member vni %d associate-vrf" %(vnid, mcast_grp, vnid)
+	target_cmd = util.remove_last_semicolon(target_cmd)
+	print target_cmd
+	resp = requests.post( util.get_nxapi_endpoint( hostip), data=json.dumps( util.get_conf_payload( target_cmd)), headers=util.myheaders,auth=(userid,passwd)).json()
+	outputs = resp['ins_api']['outputs']['output']
+	#print outputs
+	for out in outputs:
+		if not 'Success' in out['msg']:
+			retval = False
+	print 'add nve_vni on %s is %s' %(hostip, retval)
+	return retval
+
+def create_vrf(hostip, userid, passwd, vrf_name, vnid, vlan):
+	retval = True
+	target_cmd = "conf t ; vrf context %s ; vni %d ; rd auto ; address-family ipv4 unicast ; route-target export %d:%d ; route-target import %d:%d ; route-target both auto evpn ; " %(vrf_name, vnid, vlan, vlan)
 	target_cmd = util.remove_last_semicolon(target_cmd)
 	print target_cmd
 	resp = requests.post( util.get_nxapi_endpoint( hostip), data=json.dumps( util.get_conf_payload( target_cmd)), headers=util.myheaders,auth=(userid,passwd)).json()
@@ -131,8 +143,10 @@ def conf_interface( hostip, userid, passwd, switch_model, ospf_as):
 	target_cmd = 'conf t ; interface lo0 ; ip address %s ; ip router ospf %s area 0.0.0.0 ; ip pim sparse-mode ; ' %( switch_model['lo0'], ospf_as)
 	if switch_model.has_key('lo1') and switch_model['role'] == 'spine' :
 		target_cmd += 'interface lo1 ; ip address %s ; ip router ospf %s area 0.0.0.0 ; ip pim sparse-mode ; ' %( switch_model['lo1'], ospf_as)
+	if switch_model.has_key('lo0.sec') and switch_model['role'] == 'leaf':
+		target_cmd += ' interface lo0 ; ip address %s secondary ;' %(switch_model['lo0.sec'])
 	for intf in switch_model['fabric'].keys():
-		target_cmd += 'interface %s ; ip address %s ; ip router ospf %s area 0.0.0.0 ; ip pim sparse-mode ; no shut ; ' %(intf, switch_model['fabric'][intf], ospf_as)
+		target_cmd += 'interface %s ; no switchport ; mtu 9216 ; load-interval counter 1 5 ; no ip redirects ; ip address %s ; ip router ospf %s area 0.0.0.0 ; ip pim sparse-mode ; no shut ; ' %(intf, switch_model['fabric'][intf], ospf_as)
 	target_cmd = util.remove_last_semicolon(target_cmd)
 	print target_cmd
 	resp = requests.post( util.get_nxapi_endpoint( hostip), data=json.dumps( util.get_conf_payload( target_cmd)), headers=util.myheaders,auth=(userid,passwd)).json()

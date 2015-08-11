@@ -50,8 +50,8 @@ def show_nve_vni(hostip,userid,passwd):
 	print pt
 
 def show_mac_all(hostip,userid,passwd):
-	pt = PrettyTable(["topo-id", "mac-addr","prod-type", "next-hop"])
-	pt.align["topo-id"] = "l" # Left align city names
+	pt = PrettyTable(["topology-id", "mac-addr","prod-type", "next-hop"])
+	pt.align["topology-id"] = "l" # Left align city names
 	pt.padding_width = 1 # One space between column edges and contents (default)
 
 	resp = requests.post( util.get_nxapi_endpoint( hostip), data=json.dumps( util.get_payload( "show l2route evpn mac all")), headers=util.myheaders,auth=(userid,passwd)).json()
@@ -68,8 +68,8 @@ def show_mac_all(hostip,userid,passwd):
 	print pt
 
 def show_mac_ip_all(hostip,userid,passwd):
-	pt = PrettyTable(["topo-id", "mac-addr","prod-type", "host-ip", "next-hop"])
-	pt.align["topo-id"] = "l" # Left align city names
+	pt = PrettyTable(["topology-id", "mac-addr","prod-type", "host-ip", "next-hop"])
+	pt.align["topology-id"] = "l" # Left align city names
 	pt.padding_width = 1 # One space between column edges and contents (default)
 
 	resp = requests.post( util.get_nxapi_endpoint( hostip), data=json.dumps( util.get_payload( "show l2route evpn mac-ip all")), headers=util.myheaders,auth=(userid,passwd)).json()
@@ -80,9 +80,9 @@ def show_mac_ip_all(hostip,userid,passwd):
 		if type(outputs['output']['body']['TABLE_l2route_mac_ip_all']['ROW_l2route_mac_ip_all']) == list:
 			for row in outputs['output']['body']['TABLE_l2route_mac_ip_all']['ROW_l2route_mac_ip_all']:
 				pt.add_row([ row['topo-id'], row['mac-addr'], row['prod-type'], row['host-ip'], row['next-hop'] ])
-			else:
-				row = outputs['output']['body']['TABLE_l2route_mac_ip_all']['ROW_l2route_mac_ip_all']
-				pt.add_row([ row['topo-id'], row['mac-addr'], row['prod-type'], row['host-ip'], row['next-hop'] ])
+		else:
+			row = outputs['output']['body']['TABLE_l2route_mac_ip_all']['ROW_l2route_mac_ip_all']
+			pt.add_row([ row['topo-id'], row['mac-addr'], row['prod-type'], row['host-ip'], row['next-hop'] ])
 	print pt
 
 
@@ -171,6 +171,27 @@ def clear_interafce_all(hostip,userid,passwd):
 	resp = requests.post( util.get_nxapi_endpoint( hostip), data=json.dumps( util.get_conf_payload( "clear counters interface all")), headers=util.myheaders,auth=(userid,passwd)).json()
 	print resp['ins_api']['outputs']['output']['msg']
 
+def show_bgp_l2vpn_evpn_summary(hostip,userid,passwd):
+	pt = PrettyTable(["Neighbor", "version", "AS", "MsgRcvd", "MsgSent", "TblVer", "InQ", "OutQ", "Up/Down", "State", "PfxRcd"])
+	pt.align["Neighbor"] = "l" # Left align city names
+	pt.padding_width = 1 # One space between column edges and contents (default)
+
+	resp = requests.post( util.get_nxapi_endpoint( hostip), data=json.dumps( util.get_payload( "show bgp l2vpn evpn summary")), headers=util.myheaders,auth=(userid,passwd)).json()
+	outputs = resp['ins_api']['outputs']
+	if not 'Success' in outputs['output']['msg']:
+		return
+	bgp = outputs['output']['body']['TABLE_vrf']['ROW_vrf']
+	print "BGP vrf: %s address-family : L2VPN EVPN " %(bgp['vrf-name-out'])
+	print "BGP router id: %s local AS: %s" %(bgp['vrf-router-id'],bgp['vrf-local-as'])
+	bgp = outputs['output']['body']['TABLE_vrf']['ROW_vrf']['TABLE_af']['ROW_af']['TABLE_saf']['ROW_saf']
+	print "BGP table version: %d L2VPN EVPN config-peer: %s available-peer: %s" %( bgp['tableversion'], bgp['configuredpeers'], bgp['capablepeers'])
+	print "network entries: %s paths: %d " %(bgp['totalnetworks'], bgp['totalpaths'])
+	bgp = outputs['output']['body']['TABLE_vrf']['ROW_vrf']['TABLE_af']['ROW_af']['TABLE_saf']['ROW_saf']['TABLE_neighbor']['ROW_neighbor']
+	if type(bgp) == list:	
+		for row in bgp:
+			pt.add_row([ row['neighborid'], row['neighborversion'], row['neighboras'], row['msgrecvd'], row['msgsent'], row['neighbortableversion'], row['inq'], row['outq'], row['time'], row['state'], row['prefixreceived'] ])
+	print pt
+
 func_table = {
 	'nve_peer': show_nve_peers,
 	'nve_vni': show_nve_vni,
@@ -182,12 +203,13 @@ func_table = {
 	'intrate' : show_interface_rate,
 	'intstat' : show_interface_stat,
 	'clear_int' : clear_interafce_all,
+	'evpn_summary':show_bgp_l2vpn_evpn_summary,
 }
 
 if __name__ == '__main__':
 	hosts = []
 	if len(sys.argv) != 3:
-		print '#python mon_vxlan.py {nve_peer|nve_vni|mac_all|mac_ip_all|ip_arp|vxlan|vmtracker|intrate|intstat|clear_int} switch-model.yaml'
+		print '#python mon_vxlan.py {nve_peer|nve_vni|mac_all|mac_ip_all|ip_arp|vxlan|vmtracker|intrate|intstat|clear_int|evpn_summary} switch-model.yaml'
 		sys.exit(0)
 
 	cmd = sys.argv[1]

@@ -7,6 +7,7 @@ import requests
 import sys
 import util
 import os
+from prettytable import PrettyTable
 
 
 def list_vrf_interface_by_host( hostip, userid, passwd):
@@ -22,7 +23,12 @@ def list_vrf_interface_by_host( hostip, userid, passwd):
 		else:
 			vrf_map[row['vrf_name']] = set()
 			vrf_map[row['vrf_name']].add( row['if_name'])
-	print vrf_map
+	pt = PrettyTable(["vrf-name", "interface"])
+	pt.align["vrf-name"] = "l" # Left align city names
+	pt.padding_width = 1 # One space between column edges and contents (default)	
+	for n in vrf_map.keys():
+		pt.add_row( [ n, ",".join( vrf_map.get(n))])	
+	print pt
 
 if __name__ == "__main__":
 	hosts = util.load_config( sys.argv[1]) #hosts.yaml 
